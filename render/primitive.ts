@@ -1,6 +1,5 @@
-import { FillStyle, Rectangle, Graphics, ILineStyleOptions } from 'pixi.js';
+import { Rectangle, ILineStyleOptions } from 'pixi.js';
 import * as PIXI from "pixi.js";
-import { Vector2 } from "../data/vector2";
 
 
 export class PrimitiveRenderer {
@@ -9,7 +8,7 @@ export class PrimitiveRenderer {
         this.container = app;
     }
 
-    line(pointA: Vector2, pointB: Vector2, style: ILineStyleOptions) {
+    line(pointA: PIXI.IPointData, pointB: PIXI.IPointData, style: ILineStyleOptions) {
         let graphics = new PIXI.Graphics();
 
         graphics.lineStyle(style);
@@ -20,7 +19,7 @@ export class PrimitiveRenderer {
         return graphics;
     }
 
-    rectangle(filled: boolean, rectangle: Rectangle, style: ILineStyleOptions) {
+    private createShape(filled: boolean, style: ILineStyleOptions, drawCallback: (graphics: PIXI.Graphics) => void) {
         let graphics = new PIXI.Graphics();
 
         if (filled) {
@@ -29,37 +28,21 @@ export class PrimitiveRenderer {
             graphics.lineStyle(style);
         }
 
-        graphics.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        drawCallback(graphics);
+
         this.container.addChild(graphics);
         return graphics;
     }
 
-    circle(filled: boolean, center: Vector2, radius: number, style: ILineStyleOptions) {
-        let graphics = new PIXI.Graphics();
-
-        if (filled) {
-            graphics.beginFill(style.color)
-        } else {
-            graphics.lineStyle(style);
-        }
-
-        graphics.drawCircle(center.x, center.y, radius);
-        this.container.addChild(graphics);
-        return graphics;
+    rectangle(filled: boolean, rectangle: Rectangle, style: ILineStyleOptions): PIXI.Graphics {
+        return this.createShape(filled, style, (graphics) => {
+            graphics.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        });
     }
-}
 
-// this should be as simple as graphics.lineStyle(style) but alas...
-function applyLineStyle(graphics: PIXI.Graphics, style: ILineStyleOptions) {
-    graphics.lineStyle({
-        color: style.color,
-        alpha: style.alpha,
-        width: style.width,
-        alignment: style.alignment,
-        native: style.native,
-        cap: style.cap,
-        join: style.join,
-        miterLimit: style.miterLimit,
-        matrix: style.matrix
-    });
+    circle(filled: boolean, center: PIXI.IPointData, radius: number, style: ILineStyleOptions): PIXI.Graphics {
+        return this.createShape(filled, style, (graphics) => {
+            graphics.drawCircle(center.x, center.y, radius);
+        });
+    }
 }
