@@ -1,13 +1,14 @@
 import * as PIXI from 'pixi.js';
 import { Sound } from '@pixi/sound';
+import { ISize, ISpritesheetData } from 'pixi.js';
 
-type LoaderFunction = (key: string, resource: PIXI.LoaderResource) => boolean;
+type LoaderFunction = (key: string, resource: PIXI.LoaderResource) => void;
 
 let textures: Map<string, PIXI.Texture> = new Map();
 let sounds: Map<string, Sound> = new Map();
 let spritesheets: Map<string, PIXI.Spritesheet> = new Map();
 
-export class AssetType {
+export class AssetLoader {
     callback: LoaderFunction
     name: string
     private constructor(name: string, callback: LoaderFunction) {
@@ -17,21 +18,43 @@ export class AssetType {
 
     // You can create your own AssetType if you want, but we provide defaults for textures, sounds, and fonts
     static adHoc(callback: LoaderFunction) {
-        return new AssetType("AdHoc", callback);
+        return new AssetLoader("AdHoc", callback);
     }
-    static Texture = new AssetType("Texture", (key, resource) => { textures.set(key, resource.texture); return true });
-    static Sound = new AssetType("Sound", (key, resource) => { sounds.set(key, resource.sound); return true; });
-    static Spritesheet = new AssetType("Spritesheet", (key, resource) => {
+    static Texture = new AssetLoader("Texture", (key, resource) => { textures.set(key, resource.texture); });
+    static Sound = new AssetLoader("Sound", (key, resource) => { sounds.set(key, resource.sound); });
+    static Spritesheet = new AssetLoader("Spritesheet", (key, resource) => {
         spritesheets.set(key, resource.spritesheet)
-        return true;
     });
+
+    // should use with a .png
+    static dynamicSpritesheet(cellSize: ISize, getDataFromTexture: (texture: PIXI.Texture, cellSize: ISize) => ISpritesheetData) {
+        return new AssetLoader("DynamicSpritesheet", (key, resource) => {
+            let spritesheet = new PIXI.Spritesheet(resource.texture, getDataFromTexture(resource.texture, cellSize));
+
+            let isDone = false
+            spritesheet.parse(() => { isDone = true; });
+
+
+            let i = 0
+            while (isDone === false) {
+                i++;
+
+                if (i > 100000) {
+                    console.log("DynamicSpritesheet took too long")
+                    break;
+                }
+            }
+
+            spritesheets.set(key, spritesheet);
+        });
+    }
 }
 
 let allAssetKeys: string[] = []
-let assetTypeMap: Map<string, AssetType> = new Map();
+let assetTypeMap: Map<string, AssetLoader> = new Map();
 const loader = PIXI.Loader.shared;
 
-export function prepareLoad(assetType: AssetType, key: string, assetPath: string) {
+export function prepareLoad(assetType: AssetLoader, key: string, assetPath: string) {
     allAssetKeys.push(key)
     loader.add(key, `assets/${assetPath}`)
     assetTypeMap.set(key, assetType);

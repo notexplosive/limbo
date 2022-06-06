@@ -1,18 +1,21 @@
 import * as PIXI from "pixi.js";
 import { Updater } from './updater';
 import { Key } from "../input/keyboard";
+import { Viewport } from "pixi-viewport";
 
 export class Game {
     readonly isDevBuild: boolean;
     readonly app: PIXI.Application;
-    readonly worldContainer: PIXI.Container;
+    readonly rootContainer: PIXI.Container;
     readonly updaters: Updater[] = [];
     readonly keyboard: Map<string, Key> = new Map();
+    readonly world: Viewport;
 
-    constructor(app: PIXI.Application, isDevBuild: boolean) {
+    constructor(app: PIXI.Application, screenSize: PIXI.ISize, isDevBuild: boolean) {
         this.app = app;
         this.isDevBuild = isDevBuild;
-        this.worldContainer = app.stage.addChild(new PIXI.Container());
+        this.rootContainer = app.stage.addChild(new PIXI.Container());
+        this.world = new Viewport({ screenWidth: 800, screenHeight: 600 });
     }
 
     update(delta: number) {
