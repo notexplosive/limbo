@@ -1,11 +1,28 @@
-export class Updater {
-    fn: (dt: number) => void;
+type UpdateFunction = (dt: number) => void;
 
-    constructor(fn: (dt: number) => void) {
-        this.fn = fn;
+export class Updater {
+    private fns: UpdateFunction[] = [];
+
+    constructor(fn?: UpdateFunction) {
+        if (fn !== undefined) {
+            this.fns.push(fn);
+        }
     }
 
-    run(dt: number) {
-        this.fn(dt);
+    execute(dt: number) {
+        for (let fn of this.fns) {
+            fn(dt);
+        }
+    }
+
+    remove(fn: UpdateFunction) {
+        let index = this.fns.indexOf(fn);
+        if (index !== -1) {
+            this.fns.slice(index, 1);
+        }
+    }
+
+    add(fn: UpdateFunction) {
+        this.fns.push(fn);
     }
 }

@@ -19,9 +19,9 @@ export class Game {
         this.world.sortableChildren = true
     }
 
-    update(delta: number) {
+    update(dt: number) {
         for (let updater of this.updaters) {
-            updater.fn(delta);
+            updater.execute(dt)
         }
     }
 
