@@ -10,25 +10,45 @@ let spritesheets: Map<string, PIXI.Spritesheet> = new Map();
 
 export class AssetLoader {
     callback: LoaderFunction
-    name: string
-    private constructor(name: string, callback: LoaderFunction) {
-        this.name = name;
+    assetTypeName: string
+    validExtensions: string[];
+
+    private constructor(assetTypeName: string, validExtensions: string[], callback: LoaderFunction) {
+        this.assetTypeName = assetTypeName;
+        this.validExtensions = validExtensions;
         this.callback = callback;
     }
 
+    verifyExtension(path: string) {
+        let splitPath = path.split('.')
+        let extension = splitPath[splitPath.length - 1]
+
+        if (this.validExtensions.includes(extension, 0)) {
+            return true;
+        }
+
+        if (this.validExtensions.includes("*")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static readonly validTextureExtensions = ["png"];
+
     // You can create your own AssetType if you want, but we provide defaults for textures, sounds, and fonts
     static adHoc(callback: LoaderFunction) {
-        return new AssetLoader("AdHoc", callback);
+        return new AssetLoader("AdHoc", ["*"], callback);
     }
-    static Texture = new AssetLoader("Texture", (key, resource) => { textures.set(key, resource.texture); });
-    static Sound = new AssetLoader("Sound", (key, resource) => { sounds.set(key, resource.sound); });
-    static Spritesheet = new AssetLoader("Spritesheet", (key, resource) => {
+    static Texture = new AssetLoader("Texture", AssetLoader.validTextureExtensions, (key, resource) => { textures.set(key, resource.texture); });
+    static Sound = new AssetLoader("Sound", ["ogg", "wav"], (key, resource) => { sounds.set(key, resource.sound); });
+    static Spritesheet = new AssetLoader("Spritesheet", ["json"], (key, resource) => {
         spritesheets.set(key, resource.spritesheet)
     });
 
     // should use with a .png
     static dynamicSpritesheet(cellSize: ISize, getDataFromTexture: (texture: PIXI.Texture, cellSize: ISize) => ISpritesheetData) {
-        return new AssetLoader("DynamicSpritesheet", (key, resource) => {
+        return new AssetLoader("DynamicSpritesheet", AssetLoader.validTextureExtensions, (key, resource) => {
             let spritesheet = new PIXI.Spritesheet(resource.texture, getDataFromTexture(resource.texture, cellSize));
 
             let isDone = false
@@ -54,10 +74,13 @@ let allAssetKeys: string[] = []
 let assetTypeMap: Map<string, AssetLoader> = new Map();
 const loader = PIXI.Loader.shared;
 
-export function prepareLoad(assetType: AssetLoader, key: string, assetPath: string) {
+export function prepareLoad(assetLoader: AssetLoader, key: string, assetPath: string) {
     allAssetKeys.push(key)
     loader.add(key, `assets/${assetPath}`)
-    assetTypeMap.set(key, assetType);
+    if (!assetLoader.verifyExtension(assetPath)) {
+        console.warn(`Trying to load ${assetPath} as a ${assetLoader.assetTypeName}, supported extensions are ${assetLoader.validExtensions}`)
+    }
+    assetTypeMap.set(key, assetLoader);
 }
 
 
@@ -69,7 +92,7 @@ export function finishLoad(onFinished: () => void) {
         for (let key of allAssetKeys) {
             let assetType = assetTypeMap.get(key)
             assetType.callback(key, resources[key])
-            console.log(`${assetType.name} loaded as key: ${key}`)
+            console.log(`${assetType.assetTypeName} loaded as key: ${key}`)
         }
 
         onFinished();
