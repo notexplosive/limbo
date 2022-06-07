@@ -17,6 +17,8 @@ export class Game {
         this.rootContainer = app.stage.addChild(new PIXI.Container());
         this.world = new Viewport({ screenWidth: 800, screenHeight: 600 });
         this.world.sortableChildren = true
+
+        this.rootContainer.addChild(this.world)
     }
 
     update(dt: number) {
