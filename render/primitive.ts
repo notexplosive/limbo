@@ -4,8 +4,8 @@ import * as PIXI from "pixi.js";
 
 export class PrimitiveRenderer {
     container: PIXI.Container;
-    constructor(app: PIXI.Container) {
-        this.container = app;
+    constructor(containerToAttach: PIXI.Container) {
+        this.container = containerToAttach;
     }
 
     line(pointA: PIXI.IPointData, pointB: PIXI.IPointData, style: ILineStyleOptions) {
@@ -27,6 +27,8 @@ export class PrimitiveRenderer {
         } else {
             graphics.lineStyle(style);
         }
+
+        graphics.alpha = style.alpha
 
         drawCallback(graphics);
 
