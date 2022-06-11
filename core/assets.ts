@@ -1,5 +1,5 @@
+import { Sound, sound } from '@pixi/sound';
 import * as PIXI from 'pixi.js';
-import { Sound } from '@pixi/sound';
 import { ISize, ISpritesheetData } from 'pixi.js';
 
 type LoaderFunction = (key: string, resource: PIXI.LoaderResource) => void;
@@ -41,7 +41,9 @@ export class AssetLoader {
         return new AssetLoader("AdHoc", ["*"], callback);
     }
     static Texture = new AssetLoader("Texture", AssetLoader.validTextureExtensions, (key, resource) => { textures.set(key, resource.texture); });
-    static Sound = new AssetLoader("Sound", ["ogg", "wav"], (key, resource) => { sounds.set(key, resource.sound); });
+    static Sound = new AssetLoader("Sound", ["ogg", "wav"], (key, resource) => {
+        sounds.set(key, resource.sound);
+    });
     static Spritesheet = new AssetLoader("Spritesheet", ["json"], (key, resource) => {
         spritesheets.set(key, resource.spritesheet)
     });
@@ -75,6 +77,7 @@ let assetTypeMap: Map<string, AssetLoader> = new Map();
 const loader = PIXI.Loader.shared;
 
 export function prepareLoad(assetLoader: AssetLoader, key: string, assetPath: string) {
+    sound.init()
     allAssetKeys.push(key)
     loader.add(key, `assets/${assetPath}`)
     if (!assetLoader.verifyExtension(assetPath)) {
@@ -91,6 +94,9 @@ export function finishLoad(onFinished: () => void) {
     function loadCallback(loader: PIXI.Loader, resources: PIXI.utils.Dict<PIXI.LoaderResource>) {
         for (let key of allAssetKeys) {
             let assetType = assetTypeMap.get(key)
+            if (resources[key] === undefined) {
+                console.error(`resoruces[${key}] was undefined, something went wrong`)
+            }
             assetType.callback(key, resources[key])
             console.log(`${assetType.assetTypeName} loaded as key: ${key}`)
         }
