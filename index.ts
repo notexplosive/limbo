@@ -1,0 +1,42 @@
+import { Game } from "./data/game";
+import { preload } from "../mygame/preload"
+import { main, update } from "../mygame/main"
+import { finishLoad } from './core/assets';
+import { Application } from "pixi.js";
+
+// Setup DOM
+document.body.style.margin = "0";
+document.body.tabIndex = 1;
+document.body.style.background = "rgb(0, 0, 50)";
+
+// Setup App
+let app = new Application({
+  width: 800,
+  height: 600,
+  backgroundColor: 0x111111,
+});
+
+var isDevBuild = false;
+if (process.env.NODE_ENV !== "production") {
+  console.log("💻🤖 DEVELOPMENT BUILD DETECTED 🤖💻");
+  isDevBuild = true
+}
+
+document.body.appendChild(app.view);
+
+export const game = new Game(app, { width: app.screen.width, height: app.screen.height }, isDevBuild);
+
+function coreUpdateLoop(dt: number) {
+  game.app.stage.interactive = false
+  game.app.stage.buttonMode = false
+
+  update(dt)
+}
+
+app.ticker.add(() => {
+  let dt = app.ticker.elapsedMS / 1000
+  coreUpdateLoop(dt)
+});
+
+preload()
+finishLoad(main)
