@@ -1,15 +1,14 @@
-import { Rectangle, ILineStyleOptions } from 'pixi.js';
-import * as PIXI from "pixi.js";
+import { Rectangle, ILineStyleOptions, Container, Graphics, IPointData } from 'pixi.js';
 
 
 export class OmniPrimitive {
-    container: PIXI.Container;
-    constructor(containerToAttach: PIXI.Container) {
+    container: Container;
+    constructor(containerToAttach: Container) {
         this.container = containerToAttach;
     }
 
-    line(pointA: PIXI.IPointData, pointB: PIXI.IPointData, style: ILineStyleOptions) {
-        let graphics = new PIXI.Graphics();
+    line(pointA: IPointData, pointB: IPointData, style: ILineStyleOptions) {
+        let graphics = new Graphics();
 
         graphics.lineStyle(style);
         graphics.moveTo(pointA.x, pointA.y);
@@ -19,32 +18,50 @@ export class OmniPrimitive {
         return graphics;
     }
 
-    private createShape(filled: boolean, style: ILineStyleOptions, drawCallback: (graphics: PIXI.Graphics) => void) {
-        let graphics = new PIXI.Graphics();
-
-        if (filled) {
-            graphics.beginFill(style.color);
-        } else {
-            graphics.lineStyle(style);
-        }
-
-        graphics.alpha = style.alpha
-
-        drawCallback(graphics);
-
+    private createShapeAndAddChild(filled: boolean, style: ILineStyleOptions, drawCallback: (graphics: Graphics) => void) {
+        let graphics = createShape(new Graphics(), filled, style, drawCallback)
         this.container.addChild(graphics);
         return graphics;
     }
 
-    rectangle(filled: boolean, rectangle: Rectangle, style: ILineStyleOptions): PIXI.Graphics {
-        return this.createShape(filled, style, (graphics) => {
+    rectangle(filled: boolean, rectangle: Rectangle, style: ILineStyleOptions): Graphics {
+        return this.createShapeAndAddChild(filled, style, (graphics) => {
             graphics.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         });
     }
 
-    circle(filled: boolean, center: PIXI.IPointData, radius: number, style: ILineStyleOptions): PIXI.Graphics {
-        return this.createShape(filled, style, (graphics) => {
+    circle(filled: boolean, center: IPointData, radius: number, style: ILineStyleOptions): Graphics {
+        return this.createShapeAndAddChild(filled, style, (graphics) => {
             graphics.drawCircle(center.x, center.y, radius);
         });
+    }
+}
+
+function createShape(graphics: Graphics, filled: boolean, style: ILineStyleOptions, drawCallback: (graphics: Graphics) => void) {
+
+    if (filled) {
+        graphics.beginFill(style.color);
+    } else {
+        graphics.lineStyle(style);
+    }
+
+    graphics.alpha = style.alpha
+
+    drawCallback(graphics);
+
+    return graphics;
+}
+
+export class CirclePrimitive extends Graphics {
+    radius: number = 0;
+
+    constructor(filled: boolean, radius: number, style: ILineStyleOptions) {
+        super()
+        this.radius = radius;
+
+        let capturedThis = this
+        createShape(this, filled, style, () => {
+            capturedThis.drawCircle(capturedThis.x, capturedThis.y, capturedThis.radius);
+        })
     }
 }
