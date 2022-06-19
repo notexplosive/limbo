@@ -2,7 +2,7 @@ import { Rectangle, ILineStyleOptions } from 'pixi.js';
 import * as PIXI from "pixi.js";
 
 
-export class PrimitiveRenderer {
+export class OmniPrimitive {
     container: PIXI.Container;
     constructor(containerToAttach: PIXI.Container) {
         this.container = containerToAttach;
