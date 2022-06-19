@@ -8,7 +8,6 @@ export class Game {
     readonly isDevBuild: boolean;
     readonly app: PIXI.Application;
     readonly rootContainer: PIXI.Container;
-    readonly updaters: Updater[] = [];
     readonly keyboard: Map<string, Key> = new Map();
     readonly world: Viewport;
     readonly onClick: SubscribableFunction = new SubscribableFunction();
@@ -54,15 +53,6 @@ export class Game {
         this.app.stage.on("pointerover", onButtonHover)
         this.app.stage.on("pointerout", onButtonUnhover)
         this.app.stage.on("pointerupoutside", onButtonUpOutside)
-    }
-
-    update(dt: number) {
-        this.app.stage.interactive = false
-        this.app.stage.buttonMode = false
-
-        for (let updater of this.updaters) {
-            updater.execute(dt)
-        }
     }
 
     setupKey(keyName: string) {
