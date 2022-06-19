@@ -76,6 +76,14 @@ let allAssetKeys: string[] = []
 let assetTypeMap: Map<string, AssetLoader> = new Map();
 const loader = PIXI.Loader.shared;
 
+/**
+ * 
+ *
+ * @export
+ * @param {AssetLoader} assetLoader should be an instance of an AssetLoader, such as AssetLoader.Texture or AssetLoader.Sound
+ * @param {string} key key that the asset will be indexed by later
+ * @param {string} assetPath actual path to the asset, starting in the `assets` folder (eg: "images/foo.png" becomes "assets/images/foo.png")
+ */
 export function prepareLoad(assetLoader: AssetLoader, key: string, assetPath: string) {
     sound.init()
     allAssetKeys.push(key)
