@@ -1,4 +1,4 @@
-import { Rectangle, ILineStyleOptions, Container, Graphics, IPointData } from 'pixi.js';
+import { Rectangle, ILineStyleOptions, Container, Graphics, IPointData, Point } from 'pixi.js';
 
 
 export class OmniPrimitive {
@@ -63,6 +63,8 @@ abstract class ShapePrimitive extends Container {
         this.graphics = new Graphics()
         this.addChild(this.graphics)
 
+        style.color = style.color === undefined ? 0xffffff : style.color
+        style.width = style.width === undefined ? 1 : style.width
         this._style = style
         this._filled = filled
     }
@@ -77,7 +79,6 @@ abstract class ShapePrimitive extends Container {
         }
 
         this.alpha = this.style.alpha || 1
-        this.style.width = (this.style.width === undefined) ? 1 : this.style.width
 
         this.drawShape(this.graphics)
     }
@@ -123,6 +124,43 @@ export class CirclePrimitive extends ShapePrimitive {
 
     public set radius(value: number) {
         this._radius = value;
+        this.refresh()
+    }
+}
+
+export class LinePrimitive extends ShapePrimitive {
+    private _start: Point;
+    private _end: Point;
+
+    constructor(start: Point, end: Point, style: ILineStyleOptions) {
+        super(false, style)
+
+        this._start = start
+        this._end = end
+
+        this.refresh()
+    }
+
+    protected drawShape(graphics: Graphics): void {
+        graphics.moveTo(this.start.x, this.start.y)
+        graphics.lineTo(this.end.x, this.end.y)
+    }
+
+    public get start(): Point {
+        return this._start;
+    }
+
+    public set start(value: Point) {
+        this._start = value;
+        this.refresh()
+    }
+
+    public get end(): Point {
+        return this._end;
+    }
+
+    public set end(value: Point) {
+        this._end = value;
         this.refresh()
     }
 }
