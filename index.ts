@@ -1,6 +1,6 @@
 import { Game } from "./data/game";
-import { preload } from "../mygame/preload"
-import { main, update } from "../mygame/main"
+import { preload } from "../preload"
+import { main, update } from "../main"
 import { finishLoad } from './core/assets';
 import { Application } from "pixi.js";
 
