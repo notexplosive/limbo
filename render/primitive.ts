@@ -1,4 +1,5 @@
 import { Rectangle, ILineStyleOptions, Container, Graphics, IPointData, Point } from 'pixi.js';
+import { negatePoint } from '../functions/point-math';
 
 
 export class OmniPrimitive {
@@ -55,7 +56,7 @@ function createShape(graphics: Graphics, filled: boolean, style: ILineStyleOptio
 abstract class ShapePrimitive extends Container {
     private _style: ILineStyleOptions;
     private _filled: boolean;
-    private readonly graphics: Graphics;
+    protected readonly graphics: Graphics;
 
     constructor(filled: boolean, style: ILineStyleOptions) {
         super()
@@ -161,6 +162,47 @@ export class LinePrimitive extends ShapePrimitive {
 
     public set end(value: Point) {
         this._end = value;
+        this.refresh()
+    }
+}
+
+export class RectanglePrimitive extends ShapePrimitive {
+    private _rectWidth: number;
+    private _rectHeight: number;
+    constructor(filled: boolean, rectWidth: number, rectHeight: number, style: ILineStyleOptions) {
+        super(filled, style);
+        this.rectWidth = rectWidth
+        this.rectHeight = rectHeight
+    }
+
+    protected drawShape(graphics: Graphics): void {
+        graphics.drawRect(this.x, this.y, this.rectWidth, this.rectHeight)
+    }
+
+    public get rectWidth(): number {
+        return this._rectWidth;
+    }
+
+    public set rectWidth(value: number) {
+        this._rectWidth = value;
+        this.refresh()
+    }
+
+    public get rectHeight(): number {
+        return this._rectHeight;
+    }
+
+    public set rectHeight(value: number) {
+        this._rectHeight = value;
+        this.refresh()
+    }
+
+    public get offset(): Point {
+        return negatePoint(this.graphics.position);
+    }
+
+    public set offset(value: Point) {
+        this.graphics.position = negatePoint(value)
         this.refresh()
     }
 }
