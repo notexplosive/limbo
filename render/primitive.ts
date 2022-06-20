@@ -52,26 +52,22 @@ function createShape(graphics: Graphics, filled: boolean, style: ILineStyleOptio
     return graphics;
 }
 
-export class CirclePrimitive extends Container {
-    private _radius: number;
-    private _filled: boolean;
+abstract class ShapePrimitive extends Container {
     private _style: ILineStyleOptions;
+    private _filled: boolean;
     private readonly graphics: Graphics;
 
-    constructor(filled: boolean, radius: number, style: ILineStyleOptions) {
+    constructor(filled: boolean, style: ILineStyleOptions) {
         super()
 
         this.graphics = new Graphics()
         this.addChild(this.graphics)
 
-        this._radius = radius
-        this._filled = filled
         this._style = style
-
-        this.refresh()
+        this._filled = filled
     }
 
-    refresh() {
+    protected refresh() {
         this.graphics.clear();
 
         if (this.filled) {
@@ -83,17 +79,10 @@ export class CirclePrimitive extends Container {
         this.alpha = this.style.alpha || 1
         this.style.width = (this.style.width === undefined) ? 1 : this.style.width
 
-        this.graphics.drawCircle(this.x, this.y, this.radius)
+        this.drawShape(this.graphics)
     }
 
-    public get radius(): number {
-        return this._radius;
-    }
-
-    public set radius(value: number) {
-        this._radius = value;
-        this.refresh()
-    }
+    protected abstract drawShape(graphics: Graphics): void;
 
     public get filled(): boolean {
         return this._filled;
@@ -110,6 +99,30 @@ export class CirclePrimitive extends Container {
 
     public set style(value: ILineStyleOptions) {
         this._style = value;
+        this.refresh()
+    }
+}
+
+export class CirclePrimitive extends ShapePrimitive {
+    private _radius: number;
+
+    constructor(filled: boolean, radius: number, style: ILineStyleOptions) {
+        super(filled, style)
+        this._radius = radius
+
+        this.refresh()
+    }
+
+    protected drawShape(graphics: Graphics) {
+        graphics.drawCircle(this.x, this.y, this.radius)
+    }
+
+    public get radius(): number {
+        return this._radius;
+    }
+
+    public set radius(value: number) {
+        this._radius = value;
         this.refresh()
     }
 }
