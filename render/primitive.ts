@@ -52,16 +52,64 @@ function createShape(graphics: Graphics, filled: boolean, style: ILineStyleOptio
     return graphics;
 }
 
-export class CirclePrimitive extends Graphics {
-    radius: number = 0;
+export class CirclePrimitive extends Container {
+    private _radius: number;
+    private _filled: boolean;
+    private _style: ILineStyleOptions;
+    private readonly graphics: Graphics;
 
     constructor(filled: boolean, radius: number, style: ILineStyleOptions) {
         super()
-        this.radius = radius;
 
-        let capturedThis = this
-        createShape(this, filled, style, () => {
-            capturedThis.drawCircle(capturedThis.x, capturedThis.y, capturedThis.radius);
-        })
+        this.graphics = new Graphics()
+        this.addChild(this.graphics)
+
+        this._radius = radius
+        this._filled = filled
+        this._style = style
+
+        this.refresh()
+    }
+
+    refresh() {
+        this.graphics.clear();
+
+        if (this.filled) {
+            this.graphics.beginFill(this.style.color);
+        } else {
+            this.graphics.lineStyle(this.style);
+        }
+
+        this.alpha = this.style.alpha || 1
+        this.style.width = (this.style.width === undefined) ? 1 : this.style.width
+
+        this.graphics.drawCircle(this.x, this.y, this.radius)
+    }
+
+    public get radius(): number {
+        return this._radius;
+    }
+
+    public set radius(value: number) {
+        this._radius = value;
+        this.refresh()
+    }
+
+    public get filled(): boolean {
+        return this._filled;
+    }
+
+    public set filled(value: boolean) {
+        this._filled = value;
+        this.refresh()
+    }
+
+    public get style(): ILineStyleOptions {
+        return this._style;
+    }
+
+    public set style(value: ILineStyleOptions) {
+        this._style = value;
+        this.refresh()
     }
 }
