@@ -90,6 +90,10 @@ export class LinePrimitive extends ShapePrimitive {
         this.refresh()
     }
 
+    static fromZero(end: Point, style: ILineStyleOptions) {
+        return new LinePrimitive(new Point(0, 0), end, style);
+    }
+
     protected drawShape(graphics: Graphics): void {
         graphics.moveTo(this.start.x, this.start.y)
         graphics.lineTo(this.end.x, this.end.y)

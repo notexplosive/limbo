@@ -10,15 +10,19 @@ export class Game {
     readonly rootContainer: PIXI.Container;
     readonly keyboard: Map<string, Key> = new Map();
     readonly world: Viewport;
+    readonly background: Viewport;
     readonly onClick: SubscribableFunction = new SubscribableFunction();
 
     constructor(app: PIXI.Application, screenSize: PIXI.ISize, isDevBuild: boolean) {
         this.app = app;
         this.isDevBuild = isDevBuild;
         this.rootContainer = app.stage.addChild(new PIXI.Container());
+        this.background = new Viewport({ screenWidth: 800, screenHeight: 600 });
+        this.background.sortableChildren = true
         this.world = new Viewport({ screenWidth: 800, screenHeight: 600 });
         this.world.sortableChildren = true
 
+        this.rootContainer.addChild(this.background)
         this.rootContainer.addChild(this.world)
 
         let buttonState = { isEngaged: false, isHovered: false }
