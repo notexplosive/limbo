@@ -75,4 +75,8 @@ export class Game {
     globalMousePosition(): Point {
         return this.app.renderer.plugins.interaction.mouse.global as Point
     }
+
+    hitTest(point: Point) {
+        return this.app.renderer.plugins.interaction.hitTest(point)
+    }
 }
