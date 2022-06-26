@@ -3,6 +3,7 @@ import { Updater } from './updater';
 import { Key } from "../input/keyboard";
 import { Viewport } from "pixi-viewport";
 import { SubscribableFunction } from "./subscribable-function";
+import { IPointData, Point } from 'pixi.js';
 
 export class Game {
     readonly isDevBuild: boolean;
@@ -69,5 +70,9 @@ export class Game {
 
     requestButtonModeTrue() {
         this.app.stage.buttonMode = true
+    }
+
+    globalMousePosition(): Point {
+        return this.app.renderer.plugins.interaction.mouse.global as Point
     }
 }
