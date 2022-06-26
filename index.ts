@@ -11,8 +11,8 @@ document.body.style.background = "rgb(0, 0, 50)";
 
 // Setup App
 let app = new Application({
-  width: 800,
-  height: 600,
+  width: 1600,
+  height: 900,
   backgroundColor: 0x111111,
 });
 

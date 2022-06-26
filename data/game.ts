@@ -17,9 +17,9 @@ export class Game {
         this.app = app;
         this.isDevBuild = isDevBuild;
         this.rootContainer = app.stage.addChild(new PIXI.Container());
-        this.background = new Viewport({ screenWidth: 800, screenHeight: 600 });
+        this.background = new Viewport({ screenWidth: screenSize.width, screenHeight: screenSize.height });
         this.background.sortableChildren = true
-        this.world = new Viewport({ screenWidth: 800, screenHeight: 600 });
+        this.world = new Viewport({ screenWidth: screenSize.width, screenHeight: screenSize.height });
         this.world.sortableChildren = true
 
         this.rootContainer.addChild(this.background)
