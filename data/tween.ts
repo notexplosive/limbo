@@ -85,6 +85,7 @@ abstract class InstantBehaviorTween implements ITween {
     private hasExecutedBehavior: boolean;
 
     updateAndGetOverflow(dt: number): number {
+
         if (!this.hasExecutedBehavior) {
             this.behavior()
             this.hasExecutedBehavior = true;
@@ -99,6 +100,7 @@ abstract class InstantBehaviorTween implements ITween {
     abstract behavior(): void
 
     reset(): void {
+
         this.hasExecutedBehavior = false
     }
 }
@@ -135,6 +137,7 @@ export class MultiplexTween implements ITween {
     updateAndGetOverflow(dt: number): number {
         let totalOverflow = 0
         for (let tween of this.contents) {
+
             let overflow = tween.updateAndGetOverflow(dt)
             if (totalOverflow === 0) {
                 totalOverflow = overflow
@@ -161,6 +164,7 @@ export class MultiplexTween implements ITween {
     }
 
     reset(): void {
+
         for (let tween of this.contents) {
             tween.reset()
         }
@@ -193,6 +197,7 @@ export class Tween<T> implements ITween {
     }
 
     updateAndGetOverflow(dt: number) {
+
         if (this.currentTime == 0) {
             // this is our first update, acquire the "new" starting value (if it changed)
             this.startingValue = this.tweenable.get()
@@ -223,6 +228,7 @@ export class Tween<T> implements ITween {
     }
 
     reset() {
+
         this.currentTime = 0
         this.apply()
     }
@@ -242,8 +248,10 @@ export class TweenChain implements ITween {
     }
 
     reset() {
+
         this.currentChainIndex = 0
         for (let tween of this.chain) {
+
             tween.reset()
         }
     }
@@ -257,11 +265,13 @@ export class TweenChain implements ITween {
         if (this.isDone()) {
             return 0
         }
-        const currentItem = this.currentChainItem()
-        let overflow = currentItem.updateAndGetOverflow(dt)
 
-        if (currentItem.isDone()) {
+        // we have to call this.currentChainItem() each time because it might change
+        let overflow = this.currentChainItem().updateAndGetOverflow(dt)
+
+        if (this.currentChainItem().isDone()) {
             this.currentChainIndex++
+
             this.updateAndGetOverflow(overflow)
         }
 
@@ -277,7 +287,7 @@ export class TweenChain implements ITween {
         this.chain.push(tween)
 
         if (this.chain.length > 100) {
-            console.log("WARNING: long tween detected " + this.chain.length)
+            console.log("WARNING: tween chain has over 100 items " + this.chain.length)
         }
         return this
     }
@@ -306,6 +316,7 @@ export class Tweenable<T> {
     }
 
     set(newValue: T) {
+
         this.setter(newValue)
     }
 
