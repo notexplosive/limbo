@@ -11,3 +11,7 @@ export function subtractPoints(left: IPointData, right: IPointData) {
 export function negatePoint(point: IPointData) {
     return new Point(-point.x, -point.y)
 }
+
+export function multiplyPoint(point: IPointData, scalar: number) {
+    return new Point(point.x * scalar, point.y * scalar)
+}
