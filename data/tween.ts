@@ -275,16 +275,11 @@ export class TweenChain implements ITween {
 
     add(tween: ITween) {
         this.chain.push(tween)
+
+        if (this.chain.length > 100) {
+            console.log("WARNING: long tween detected " + this.chain.length)
+        }
         return this
-    }
-
-    addNumberTween(tweenable: TweenableNumber, targetValue: number, duration: number, easeFunction: EaseFunction): TweenChain {
-        return this.add(new Tween<number>(tweenable, targetValue, duration, easeFunction))
-
-    }
-
-    addPointTween(tweenable: TweenablePoint, targetValue: Point, duration: number, easeFunction: EaseFunction): TweenChain {
-        return this.add(new Tween<Point>(tweenable, targetValue, duration, easeFunction))
     }
 
     isEmpty(): boolean {
