@@ -27,7 +27,8 @@ document.body.appendChild(app.view);
 export const game = new Game(app, { width: app.screen.width, height: app.screen.height }, isDevBuild);
 
 preload()
-finishLoad(main)
+
+
 
 function coreUpdateLoop(dt: number) {
   game.app.stage.interactive = false
@@ -36,7 +37,13 @@ function coreUpdateLoop(dt: number) {
   update(dt)
 }
 
-app.ticker.add(() => {
-  let dt = app.ticker.elapsedMS / 1000
-  coreUpdateLoop(dt)
-});
+function onFinishLoad() {
+  main()
+
+  app.ticker.add(() => {
+    let dt = app.ticker.elapsedMS / 1000
+    coreUpdateLoop(dt)
+  });
+}
+
+finishLoad(onFinishLoad)
