@@ -22,6 +22,14 @@ export class EaseFunctions {
     public static quadSlowFastSlow(x: number): number {
         return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
     }
+
+    public static sineSlowFast(x: number): number {
+        return 1 - Math.cos((x * Math.PI) / 2);
+    }
+
+    public static sineFastSlow(x: number): number {
+        return Math.sin((x * Math.PI) / 2);
+    }
 }
 
 export interface ITween {
