@@ -15,3 +15,7 @@ export function negatePoint(point: IPointData) {
 export function multiplyPoint(point: IPointData, scalar: number) {
     return new Point(point.x * scalar, point.y * scalar)
 }
+
+export function pointMagnitude(point: IPointData) {
+    return Math.sqrt((0 - point.x) * (0 - point.x) + (0 - point.y) * (0 - point.y))
+}
