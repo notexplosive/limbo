@@ -360,9 +360,10 @@ export class TweenChain implements ITween {
         for (let chainIndex = 0; chainIndex < this.chain.length; chainIndex++) {
             let item = this.chain[chainIndex]
 
-            totalTime += item.getDuration()
+            let itemDuration = item.getDuration()
+            totalTime += itemDuration
 
-            if (totalTime >= targetTime) {
+            if (totalTime >= targetTime && itemDuration != 0) {
                 targetChainIndex = chainIndex
                 let tween = this.chain[targetChainIndex]
                 let timeAtCurrentTween = tween.getDuration() - (totalTime - targetTime)
@@ -370,8 +371,8 @@ export class TweenChain implements ITween {
                 break
             }
 
-            let tween = this.chain[targetChainIndex]
-            tween.updateAndGetOverflow(tween.getDuration())
+            // skip over the item
+            item.updateAndGetOverflow(itemDuration)
         }
 
         this.currentChainIndex = targetChainIndex

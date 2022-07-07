@@ -340,23 +340,23 @@ describe("jump to tween time", () => {
 
             // right -> bottom
             .add(new MultiplexTween()
-                .addChannel(new Tween(tweenableX, 0, duration, EaseFunctions.sineFastSlow))
-                .addChannel(new Tween(tweenableY, radius, duration, EaseFunctions.sineSlowFast)))
+                .addChannel(new Tween(tweenableX, 0, duration, EaseFunctions.sineSlowFast))
+                .addChannel(new Tween(tweenableY, radius, duration, EaseFunctions.sineFastSlow)))
 
             // bottom -> left
             .add(new MultiplexTween()
-                .addChannel(new Tween(tweenableX, -radius, duration, EaseFunctions.sineSlowFast))
-                .addChannel(new Tween(tweenableY, 0, duration, EaseFunctions.sineFastSlow)))
+                .addChannel(new Tween(tweenableX, -radius, duration, EaseFunctions.sineFastSlow))
+                .addChannel(new Tween(tweenableY, 0, duration, EaseFunctions.sineSlowFast)))
 
             // left -> top
             .add(new MultiplexTween()
-                .addChannel(new Tween(tweenableX, 0, duration, EaseFunctions.sineFastSlow))
-                .addChannel(new Tween(tweenableY, -radius, duration, EaseFunctions.sineSlowFast)))
+                .addChannel(new Tween(tweenableX, 0, duration, EaseFunctions.sineSlowFast))
+                .addChannel(new Tween(tweenableY, -radius, duration, EaseFunctions.sineFastSlow)))
 
             // top -> right
             .add(new MultiplexTween()
-                .addChannel(new Tween(tweenableX, radius, duration, EaseFunctions.sineSlowFast))
-                .addChannel(new Tween(tweenableY, 0, duration, EaseFunctions.sineFastSlow)))
+                .addChannel(new Tween(tweenableX, radius, duration, EaseFunctions.sineFastSlow))
+                .addChannel(new Tween(tweenableY, 0, duration, EaseFunctions.sineSlowFast)))
 
         // linear access
         tween.jumpTo(1)
@@ -375,25 +375,22 @@ describe("jump to tween time", () => {
         expect(tweenableX.get()).toBeCloseTo(radius)
         expect(tweenableY.get()).toBeCloseTo(0)
 
-        // random access
-        tween.jumpTo(2)
-        expect(tweenableX.get()).toBeCloseTo(-radius)
-        expect(tweenableY.get()).toBeCloseTo(0)
+        // random access //
 
-        tween.jumpTo(4)
-        expect(tweenableX.get()).toBeCloseTo(radius)
-        expect(tweenableY.get()).toBeCloseTo(0)
+        // baseline of a circle to compare to
+        function realCircle(time: number) {
+            let radians = Math.PI * 2 / 4 * time
 
-        tween.jumpTo(1)
-        expect(tweenableX.get()).toBeCloseTo(0)
-        expect(tweenableY.get()).toBeCloseTo(radius)
+            return { x: Math.cos(radians), y: Math.sin(radians) }
+        }
 
-        tween.jumpTo(3)
-        expect(tweenableX.get()).toBeCloseTo(0)
-        expect(tweenableY.get()).toBeCloseTo(-radius)
+        // although normally I don't like randomness in test cases, I did say "random" access, didn't I?
+        for (let i = 0; i < 100; i++) {
+            let targetVal = Math.random() * 4
 
-        tween.jumpTo(0)
-        expect(tweenableX.get()).toBeCloseTo(radius)
-        expect(tweenableY.get()).toBeCloseTo(0)
+            tween.jumpTo(targetVal)
+            expect(tweenableX.get()).toBeCloseTo(realCircle(targetVal).x)
+            expect(tweenableY.get()).toBeCloseTo(realCircle(targetVal).y)
+        }
     })
 });
