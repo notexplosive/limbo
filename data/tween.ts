@@ -37,6 +37,7 @@ export interface ITween {
     isDone(): boolean
     reset(): void
     getDuration(): number
+    jumpTo(time: number): void
 }
 
 abstract class ConditionTween implements ITween {
@@ -60,6 +61,10 @@ abstract class ConditionTween implements ITween {
 
     getDuration(): number {
         return 0
+    }
+
+    jumpTo(time: number): void {
+        // nothing to do
     }
 }
 
@@ -100,6 +105,11 @@ export class DynamicTween implements ITween {
         this.generateIfNotAlready()
         return this.generatedTween.getDuration()
     }
+
+    jumpTo(time: number): void {
+        this.generateIfNotAlready()
+        this.generatedTween.jumpTo(time)
+    }
 }
 
 abstract class InstantBehaviorTween implements ITween {
@@ -125,6 +135,10 @@ abstract class InstantBehaviorTween implements ITween {
 
     getDuration(): number {
         return 0;
+    }
+
+    jumpTo(time: number): void {
+        // nothing to do
     }
 }
 
