@@ -258,7 +258,6 @@ export class Tween<T> implements ITween {
 
     reset() {
         this.currentTime = 0
-        this.apply()
     }
 
     skip() {

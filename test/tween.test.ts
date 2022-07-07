@@ -235,6 +235,31 @@ describe("tween chains", () => {
 
         expect(tweenable.getter()).toBe(110)
     })
+
+    test("reset should not set the value", () => {
+        let tweenable = TweenableNumber.FromConstant(0);
+        let chain = new TweenChain()
+        chain.add(new Tween(tweenable, 100, 1, EaseFunctions.linear))
+        chain.add(new Tween(tweenable, 120, 1, EaseFunctions.linear))
+
+        chain.update(1.5)
+        chain.reset()
+
+        expect(tweenable.getter()).toBe(110)
+    })
+
+    test("reset and re-update should not teleport back to original start", () => {
+        let tweenable = TweenableNumber.FromConstant(0);
+        let chain = new TweenChain()
+        chain.add(new Tween(tweenable, 100, 1, EaseFunctions.linear))
+        chain.add(new Tween(tweenable, 120, 1, EaseFunctions.linear))
+
+        chain.update(1.5)
+        chain.reset()
+        chain.update(0)
+
+        expect(tweenable.getter()).toBe(110)
+    })
 });
 
 describe("jump to tween time", () => {
