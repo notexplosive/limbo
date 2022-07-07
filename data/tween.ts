@@ -195,9 +195,16 @@ export class MultiplexTween implements ITween {
     getDuration(): number {
         let result = 0
         for (let tween of this.contents) {
-            result += tween.getDuration()
+            result = Math.max(tween.getDuration(), result)
         }
         return result
+    }
+
+    jumpTo(time: number) {
+        this.reset()
+        for (let tween of this.contents) {
+            tween.updateAndGetOverflow(time)
+        }
     }
 }
 
@@ -341,8 +348,11 @@ export class TweenChain implements ITween {
 
             totalTime += item.getDuration()
 
-            if (totalTime > targetTime) {
+            if (totalTime >= targetTime) {
                 targetChainIndex = chainIndex
+                let tween = this.chain[targetChainIndex]
+                let timeAtCurrentTween = tween.getDuration() - (totalTime - targetTime)
+                tween.updateAndGetOverflow(timeAtCurrentTween)
                 break
             }
 

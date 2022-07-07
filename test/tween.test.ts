@@ -137,6 +137,16 @@ describe("multiplex", () => {
 
         expect(hit).toBe(1)
     });
+
+    test("multiplex tween reports correct duration", () => {
+        let tweenable = TweenableNumber.FromConstant(0);
+        let tween = new MultiplexTween()
+            .addChannel(new Tween(tweenable, 0, 5, EaseFunctions.linear))
+            .addChannel(new Tween(tweenable, 0, 1, EaseFunctions.linear))
+            .addChannel(new Tween(tweenable, 0, 3, EaseFunctions.linear))
+
+        expect(tween.getDuration()).toBe(5)
+    });
 })
 
 describe("tween chains", () => {
@@ -270,6 +280,30 @@ describe("jump to tween time", () => {
 
         tween.jumpTo(0.3)
         expect(tweenable.get()).toBe(30)
+
+        tween.jumpTo(0)
+        expect(tweenable.get()).toBe(0)
+
+        tween.jumpTo(0.6)
+        expect(tweenable.get()).toBe(60)
+    })
+
+    test("jump within single tween in a tween chain", () => {
+        let tweenable = TweenableNumber.FromConstant(0);
+
+        let tween = new TweenChain()
+            // You need to supply a callbackTween that sets the initial position for jumpTo to work correctly
+            .add(new CallbackTween(() => { tweenable.set(0) }))
+            .add(new Tween(tweenable, 100, 1, EaseFunctions.linear))
+
+        tween.jumpTo(0.3)
+        expect(tweenable.get()).toBeCloseTo(30)
+
+        tween.jumpTo(0)
+        expect(tweenable.get()).toBeCloseTo(0)
+
+        tween.jumpTo(0.6)
+        expect(tweenable.get()).toBeCloseTo(60)
     })
 
     test("jump across a tween chain", () => {
@@ -279,10 +313,87 @@ describe("jump to tween time", () => {
 
         let tween = new TweenChain()
             .add(new Tween(tweenable_a, 100, 1, EaseFunctions.linear))
-            .add(new Tween(tweenable_b, 300, 1, EaseFunctions.linear))
-            .add(new Tween(tweenable_c, 500, 1, EaseFunctions.linear))
+            .add(new Tween(tweenable_b, 200, 1, EaseFunctions.linear))
+            .add(new Tween(tweenable_c, 400, 1, EaseFunctions.linear))
+
+        tween.jumpTo(0.5)
+        tween.jumpTo(1.1)
+        expect(tweenable_a.get()).toBe(100)
+        expect(tweenable_b.get()).toBeCloseTo(20)
+    })
+
+    test("random access tween", () => {
+        let radius = 1
+        let duration = 1
+        // start on the right
+        let tweenableX = TweenableNumber.FromConstant(radius)
+        let tweenableY = TweenableNumber.FromConstant(0)
+
+        // tween that represents a circular pattern, starts at the same spot where it ends
+
+        let tween = new TweenChain()
+            .add(new CallbackTween(() => {
+                // setup starting values so the loop works
+                tweenableX.set(radius)
+                tweenableY.set(0)
+            }))
+
+            // right -> bottom
+            .add(new MultiplexTween()
+                .addChannel(new Tween(tweenableX, 0, duration, EaseFunctions.sineFastSlow))
+                .addChannel(new Tween(tweenableY, radius, duration, EaseFunctions.sineSlowFast)))
+
+            // bottom -> left
+            .add(new MultiplexTween()
+                .addChannel(new Tween(tweenableX, -radius, duration, EaseFunctions.sineSlowFast))
+                .addChannel(new Tween(tweenableY, 0, duration, EaseFunctions.sineFastSlow)))
+
+            // left -> top
+            .add(new MultiplexTween()
+                .addChannel(new Tween(tweenableX, 0, duration, EaseFunctions.sineFastSlow))
+                .addChannel(new Tween(tweenableY, -radius, duration, EaseFunctions.sineSlowFast)))
+
+            // top -> right
+            .add(new MultiplexTween()
+                .addChannel(new Tween(tweenableX, radius, duration, EaseFunctions.sineSlowFast))
+                .addChannel(new Tween(tweenableY, 0, duration, EaseFunctions.sineFastSlow)))
+
+        // linear access
+        tween.jumpTo(1)
+        expect(tweenableX.get()).toBeCloseTo(0)
+        expect(tweenableY.get()).toBeCloseTo(radius)
 
         tween.jumpTo(2)
-        expect(tweenable_a.get()).toBe(100)
+        expect(tweenableX.get()).toBeCloseTo(-radius)
+        expect(tweenableY.get()).toBeCloseTo(0)
+
+        tween.jumpTo(3)
+        expect(tweenableX.get()).toBeCloseTo(0)
+        expect(tweenableY.get()).toBeCloseTo(-radius)
+
+        tween.jumpTo(4)
+        expect(tweenableX.get()).toBeCloseTo(radius)
+        expect(tweenableY.get()).toBeCloseTo(0)
+
+        // random access
+        tween.jumpTo(2)
+        expect(tweenableX.get()).toBeCloseTo(-radius)
+        expect(tweenableY.get()).toBeCloseTo(0)
+
+        tween.jumpTo(4)
+        expect(tweenableX.get()).toBeCloseTo(radius)
+        expect(tweenableY.get()).toBeCloseTo(0)
+
+        tween.jumpTo(1)
+        expect(tweenableX.get()).toBeCloseTo(0)
+        expect(tweenableY.get()).toBeCloseTo(radius)
+
+        tween.jumpTo(3)
+        expect(tweenableX.get()).toBeCloseTo(0)
+        expect(tweenableY.get()).toBeCloseTo(-radius)
+
+        tween.jumpTo(0)
+        expect(tweenableX.get()).toBeCloseTo(radius)
+        expect(tweenableY.get()).toBeCloseTo(0)
     })
 });
