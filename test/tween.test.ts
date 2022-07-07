@@ -236,3 +236,28 @@ describe("tween chains", () => {
         expect(tweenable.getter()).toBe(110)
     })
 });
+
+describe("jump to tween time", () => {
+    test("jump within single tween", () => {
+        let tweenable = TweenableNumber.FromConstant(0);
+
+        let tween = new Tween(tweenable, 100, 1, EaseFunctions.linear)
+
+        tween.jumpTo(0.3)
+        expect(tweenable.get()).toBe(30)
+    })
+
+    test("jump across a tween chain", () => {
+        let tweenable_a = TweenableNumber.FromConstant(0);
+        let tweenable_b = TweenableNumber.FromConstant(0);
+        let tweenable_c = TweenableNumber.FromConstant(0);
+
+        let tween = new TweenChain()
+            .add(new Tween(tweenable_a, 100, 1, EaseFunctions.linear))
+            .add(new Tween(tweenable_b, 300, 1, EaseFunctions.linear))
+            .add(new Tween(tweenable_c, 500, 1, EaseFunctions.linear))
+
+        tween.jumpTo(2)
+        expect(tweenable_a.get()).toBe(100)
+    })
+});

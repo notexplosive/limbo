@@ -36,6 +36,7 @@ export interface ITween {
     updateAndGetOverflow(dt: number): number
     isDone(): boolean
     reset(): void
+    getDuration(): number
 }
 
 abstract class ConditionTween implements ITween {
@@ -56,6 +57,10 @@ abstract class ConditionTween implements ITween {
     reset(): void {
         // nothing to do
     }
+
+    getDuration(): number {
+        return 0
+    }
 }
 
 export class DynamicTween implements ITween {
@@ -68,11 +73,15 @@ export class DynamicTween implements ITween {
     }
 
     updateAndGetOverflow(dt: number): number {
+        this.generateIfNotAlready()
+
+        return this.generatedTween.updateAndGetOverflow(dt)
+    }
+
+    generateIfNotAlready() {
         if (this.generatedTween === null) {
             this.generatedTween = this.createFunction()
         }
-
-        return this.generatedTween.updateAndGetOverflow(dt)
     }
 
     isDone(): boolean {
@@ -87,13 +96,16 @@ export class DynamicTween implements ITween {
         this.generatedTween = null
     }
 
+    getDuration(): number {
+        this.generateIfNotAlready()
+        return this.generatedTween.getDuration()
+    }
 }
 
 abstract class InstantBehaviorTween implements ITween {
     private hasExecutedBehavior: boolean;
 
     updateAndGetOverflow(dt: number): number {
-
         if (!this.hasExecutedBehavior) {
             this.behavior()
             this.hasExecutedBehavior = true;
@@ -108,8 +120,11 @@ abstract class InstantBehaviorTween implements ITween {
     abstract behavior(): void
 
     reset(): void {
-
         this.hasExecutedBehavior = false
+    }
+
+    getDuration(): number {
+        return 0;
     }
 }
 
@@ -172,10 +187,17 @@ export class MultiplexTween implements ITween {
     }
 
     reset(): void {
-
         for (let tween of this.contents) {
             tween.reset()
         }
+    }
+
+    getDuration(): number {
+        let result = 0
+        for (let tween of this.contents) {
+            result += tween.getDuration()
+        }
+        return result
     }
 }
 
@@ -205,7 +227,6 @@ export class Tween<T> implements ITween {
     }
 
     updateAndGetOverflow(dt: number) {
-
         if (this.currentTime == 0) {
             // this is our first update, acquire the "new" starting value (if it changed)
             this.startingValue = this.tweenable.get()
@@ -236,7 +257,6 @@ export class Tween<T> implements ITween {
     }
 
     reset() {
-
         this.currentTime = 0
         this.apply()
     }
@@ -244,6 +264,15 @@ export class Tween<T> implements ITween {
     skip() {
         this.currentTime = this.duration
         this.apply()
+    }
+
+    jumpTo(time: number) {
+        this.currentTime = time
+        this.apply()
+    }
+
+    getDuration(): number {
+        return this.duration
     }
 }
 
@@ -256,10 +285,8 @@ export class TweenChain implements ITween {
     }
 
     reset() {
-
         this.currentChainIndex = 0
         for (let tween of this.chain) {
-
             tween.reset()
         }
     }
@@ -295,7 +322,8 @@ export class TweenChain implements ITween {
         this.chain.push(tween)
 
         if (this.chain.length > 100) {
-            console.log("WARNING: tween chain has over 100 items " + this.chain.length)
+            // not technically a bug but pretty alarming
+            console.warn("WARNING: tween chain has over 100 items " + this.chain.length)
         }
         return this
     }
@@ -304,11 +332,41 @@ export class TweenChain implements ITween {
         return this.chain.length == 0
     }
 
+    jumpTo(targetTime: number) {
+        this.reset()
+        let totalTime = 0
+        let targetChainIndex = 0
+
+        for (let chainIndex = 0; chainIndex < this.chain.length; chainIndex++) {
+            let item = this.chain[chainIndex]
+
+            totalTime += item.getDuration()
+
+            if (totalTime > targetTime) {
+                targetChainIndex = chainIndex
+                break
+            }
+
+            let tween = this.chain[targetChainIndex]
+            tween.updateAndGetOverflow(tween.getDuration())
+        }
+
+        this.currentChainIndex = targetChainIndex
+    }
+
     private currentChainItem() {
         if (this.chain.length > this.currentChainIndex) {
             return this.chain[this.currentChainIndex]
         }
         return null
+    }
+
+    getDuration(): number {
+        let result = 0
+        for (let tween of this.chain) {
+            result += tween.getDuration()
+        }
+        return result
     }
 }
 
