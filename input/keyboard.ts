@@ -44,3 +44,33 @@ export class Key {
         };
     }
 }
+
+export class Keyboard {
+    private keys: Map<string, Key> = new Map<string, Key>()
+    private keyNicknames: string[] = []
+    private wasPressedTable: Map<string, number> = new Map<string, number>()
+
+    register(key: Key, keyNickname: string) {
+        this.keyNicknames.push(keyNickname)
+        this.keys.set(keyNickname, key)
+    }
+
+    update() {
+        for (let keyNickname of this.keyNicknames) {
+            if (this.keys.get(keyNickname).isDown) {
+                if (this.wasPressedTable.get(keyNickname) == undefined) {
+                    this.wasPressedTable.set(keyNickname, 0)
+                }
+                else if (this.wasPressedTable.get(keyNickname) >= 0) {
+                    this.wasPressedTable.set(keyNickname, this.wasPressedTable.get(keyNickname)+1)
+                }
+            } else {
+                this.wasPressedTable.set(keyNickname, undefined)
+            }
+        }
+    }
+
+    wasPressed(keyNickname: string) {
+        return this.wasPressedTable.get(keyNickname) == 0
+    }
+}

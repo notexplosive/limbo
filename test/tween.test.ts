@@ -1,5 +1,5 @@
 import { Point } from 'pixi.js';
-import { Tween, TweenableNumber, EaseFunctions, Tweenable, TweenChain, TweenablePoint, CallbackTween, WaitUntilTween, MultiplexTween, WaitSecondsTween } from '../data/tween';
+import { Tween, TweenableNumber, EaseFunctions, Tweenable, SequenceTween, TweenablePoint, CallbackTween, WaitUntilTween, MultiplexTween, WaitSecondsTween } from '../data/tween';
 
 describe("tweens", () => {
     test("lerps accurately from 0 to 100", () => {
@@ -152,7 +152,7 @@ describe("multiplex", () => {
 describe("tween chains", () => {
     test("work with just one item", () => {
         let tweenable = TweenableNumber.FromConstant(0);
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         chain.add(new Tween<number>(tweenable, 100, 1, EaseFunctions.linear))
 
         chain.updateAndGetOverflow(0.25)
@@ -162,7 +162,7 @@ describe("tween chains", () => {
 
     test("transition to next item", () => {
         let tweenable = TweenableNumber.FromConstant(0);
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         chain.add(new Tween<number>(tweenable, 100, 0.5, EaseFunctions.linear))
         chain.add(new Tween<number>(tweenable, 120, 1, EaseFunctions.linear))
 
@@ -173,7 +173,7 @@ describe("tween chains", () => {
 
     test("helper functions for number tweens", () => {
         let tweenable = TweenableNumber.FromConstant(0);
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         chain.add(new Tween(tweenable, 100, 1, EaseFunctions.linear))
 
         chain.update(0.25)
@@ -183,7 +183,7 @@ describe("tween chains", () => {
 
     test("helper functions for point tweens", () => {
         let tweenable = TweenablePoint.FromConstant(new Point(0, 0));
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         chain.add(new Tween(tweenable, new Point(100, 100), 1, EaseFunctions.linear))
 
         chain.update(0.25)
@@ -193,7 +193,7 @@ describe("tween chains", () => {
 
     test("callback tweens work", () => {
         let tweenable = TweenablePoint.FromConstant(new Point(0, 0));
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         let hit = 0
         chain.add(new Tween(tweenable, new Point(100, 100), 0.5, EaseFunctions.linear))
         chain.add(new CallbackTween(() => { hit++ }))
@@ -207,7 +207,7 @@ describe("tween chains", () => {
 
     test("wait-until should not continue when blocked", () => {
         let tweenable = TweenableNumber.FromConstant(0);
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         let blocked = true
         chain.add(new Tween(tweenable, 100, 0.5, EaseFunctions.linear))
         chain.add(new WaitUntilTween(() => !blocked))
@@ -220,7 +220,7 @@ describe("tween chains", () => {
 
     test("wait-until should continue when not blocked", () => {
         let tweenable = TweenableNumber.FromConstant(0);
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         let blocked = true
         chain.add(new Tween(tweenable, 100, 0.5, EaseFunctions.linear))
         chain.add(new WaitUntilTween(() => !blocked))
@@ -235,7 +235,7 @@ describe("tween chains", () => {
 
     test("adding to a chain after its finished continues the chain", () => {
         let tweenable = TweenableNumber.FromConstant(0);
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         chain.add(new Tween(tweenable, 100, 1, EaseFunctions.linear))
 
         chain.update(1.2)
@@ -248,7 +248,7 @@ describe("tween chains", () => {
 
     test("reset should not set the value", () => {
         let tweenable = TweenableNumber.FromConstant(0);
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         chain.add(new Tween(tweenable, 100, 1, EaseFunctions.linear))
         chain.add(new Tween(tweenable, 120, 1, EaseFunctions.linear))
 
@@ -260,7 +260,7 @@ describe("tween chains", () => {
 
     test("reset and re-update should not teleport back to original start", () => {
         let tweenable = TweenableNumber.FromConstant(0);
-        let chain = new TweenChain()
+        let chain = new SequenceTween()
         chain.add(new Tween(tweenable, 100, 1, EaseFunctions.linear))
         chain.add(new Tween(tweenable, 120, 1, EaseFunctions.linear))
 
@@ -291,7 +291,7 @@ describe("jump to tween time", () => {
     test("jump within single tween in a tween chain", () => {
         let tweenable = TweenableNumber.FromConstant(0);
 
-        let tween = new TweenChain()
+        let tween = new SequenceTween()
             // You need to supply a callbackTween that sets the initial position for jumpTo to work correctly
             .add(new CallbackTween(() => { tweenable.set(0) }))
             .add(new Tween(tweenable, 100, 1, EaseFunctions.linear))
@@ -311,7 +311,7 @@ describe("jump to tween time", () => {
         let tweenable_b = TweenableNumber.FromConstant(0);
         let tweenable_c = TweenableNumber.FromConstant(0);
 
-        let tween = new TweenChain()
+        let tween = new SequenceTween()
             .add(new Tween(tweenable_a, 100, 1, EaseFunctions.linear))
             .add(new Tween(tweenable_b, 200, 1, EaseFunctions.linear))
             .add(new Tween(tweenable_c, 400, 1, EaseFunctions.linear))
@@ -331,7 +331,7 @@ describe("jump to tween time", () => {
 
         // tween that represents a circular pattern, starts at the same spot where it ends
 
-        let tween = new TweenChain()
+        let tween = new SequenceTween()
             .add(new CallbackTween(() => {
                 // setup starting values so the loop works
                 tweenableX.set(radius)

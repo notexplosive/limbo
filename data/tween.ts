@@ -296,7 +296,7 @@ export class Tween<T> implements ITween {
     }
 }
 
-export class TweenChain implements ITween {
+export class SequenceTween implements ITween {
     private readonly chain: ITween[] = []
     private currentChainIndex = 0
 
